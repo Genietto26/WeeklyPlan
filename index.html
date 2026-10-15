@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Weekly menu planner</title>
+<meta name="theme-color" content="#2b7a58">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+:root{--bg:#f4f7f3;--card:#fff;--ink:#1d2b27;--mut:#62706b;--line:#d9e1dc;--me:#2b7a58;--pa:#b36d17;--soft:#e8efe9;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14201c;--card:#1d2c27;--ink:#e6efeb;--mut:#9fb0a9;--line:#2f433c;--me:#5fc79a;--pa:#e5a559;--soft:#263a33;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14201c;--card:#1d2c27;--ink:#e6efeb;--mut:#9fb0a9;--line:#2f433c;--me:#5fc79a;--pa:#e5a559;--soft:#263a33;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque","Source Sans 3",system-ui,sans-serif;margin:0;letter-spacing:-.01em}
+main{max-width:760px;margin:0 auto;padding:16px 14px 80px}
+header{display:flex;justify-content:space-between;align-items:end;gap:10px;margin-bottom:12px}
+h1{font-size:1.7rem;line-height:1.1}
+.sub{color:var(--mut);font-size:.9rem}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--me);outline-offset:2px}
+.tabs{display:flex;gap:6px;background:var(--soft);padding:4px;border-radius:12px;margin-bottom:12px}
+.tabs button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font-weight:600}
+.tabs button[aria-selected=true]{background:var(--card);box-shadow:0 1px 3px #0002}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:12px}
+.days button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 0 6px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:600;font-size:.9rem}
+.days button[aria-pressed=true]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.dots{display:flex;gap:3px}
+.dot{width:9px;height:9px;border-radius:50%;border:2px solid var(--c);}
+.dot.on{background:var(--c)}
+.me{--c:var(--me)}.pa{--c:var(--pa)}
+.totals{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.tr{display:grid;grid-template-columns:62px 1fr auto;gap:10px;align-items:center;margin:4px 0}
+.tr b{color:var(--c)}
+.bar{height:12px;background:var(--soft);border-radius:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c);border-radius:8px;transition:width .25s}
+.tr span{font-variant-numeric:tabular-nums;font-size:.9rem;min-width:92px;text-align:right}
+.warn{margin:8px 0 0;font-size:.88rem;color:var(--pa)}
+.slot{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.slot h3{font-size:1.05rem;display:flex;justify-content:space-between;align-items:baseline}
+.slot h3 small{color:var(--mut);font:500 .85rem "Source Sans 3",sans-serif}
+.entry{border-top:1px solid var(--line);margin-top:10px;padding-top:10px}
+.entry .n{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.entry .x{border:0;background:none;color:var(--mut);font-size:1.3rem;line-height:1;padding:0 4px}
+.chips{display:flex;gap:6px;align-items:center;margin-top:7px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--c);background:none;color:var(--c);border-radius:20px;padding:3px 12px;font-weight:600;font-size:.88rem}
+.chip[aria-pressed=true]{background:var(--c);color:var(--card)}
+.pg{color:var(--mut);font-size:.88rem;margin-left:auto}
+.add{margin-top:10px;width:100%;border:1.5px dashed var(--line);background:none;border-radius:10px;padding:9px;color:var(--mut);font-weight:600}
+.add:hover{border-color:var(--ink);color:var(--ink)}
+dialog{width:min(560px,94vw);max-height:84vh;border:0;border-radius:16px;padding:0;background:var(--card);color:var(--ink)}
+dialog::backdrop{background:#0008}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card)}
+.dl{padding:6px 10px 14px}
+.opt{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;border:0;background:none;padding:10px 6px;border-bottom:1px solid var(--line)}
+.opt:hover{background:var(--soft)}
+.opt em{font-style:normal;font-weight:700;white-space:nowrap}
+.tag{font-size:.75rem;color:var(--mut);border:1px solid var(--line);border-radius:6px;padding:0 5px;margin-left:6px}
+.gl h3{margin:16px 0 4px;font-size:1rem;color:var(--mut)}
+.gi{display:flex;gap:10px;align-items:center;padding:9px 2px;border-bottom:1px solid var(--line)}
+.gi input{width:20px;height:20px;accent-color:var(--me)}
+.gi label{flex:1;cursor:pointer}
+.gi.t label{text-decoration:line-through;color:var(--mut)}
+.gi b{font-variant-numeric:tabular-nums}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 12px;font-weight:600}
+.note{color:var(--mut);font-size:.82rem;margin-top:18px}
+.sn{display:block;color:var(--mut);font-size:.8rem}textarea{width:100%;font:.8rem ui-monospace,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}.empty{color:var(--mut);padding:24px 0;text-align:center}
+</style>
+</head>
+<body>
+<main>
+<header><div><h1>Weekly menu</h1><div class="sub">90 g protein a day, each. Plan for one or two.</div></div><div class="row"><button class="btn" id="share">Share</button><button class="btn" id="reset">New week</button></div></header>
+<div class="tabs" role="tablist"><button role="tab" id="tp" aria-selected="true">Menu</button><button role="tab" id="tg" aria-selected="false">Grocery list</button></div>
+<section id="plan"></section>
+<section id="shop" hidden></section>
+<p class="note">Protein figures are per person and estimated from the plan's food table and typical labels; check your packs. Cauliflower is excluded. Your menu is saved only on this device; use Share to send it to another phone. Shop groups are suggestions based on what Lidl, Sainsbury's and ASDA usually carry; stock varies, so check the shelf. Broccoli is flagged if it appears more than once a day.</p>
+</main>
+<dialog id="dlg"></dialog>
+<script>
+const TARGET=90,DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const SL=[['bk','Breakfast','8:00','B'],['s1','Snack','11:00','S'],['lu','Lunch','1:00','L'],['s2','Snack','4:00','S'],['di','Dinner','by 7:30','D']];
+const AI={F:'Fish & seafood',M:'Meat & eggs',V:'Vegetables & salad',D:'Dairy & alternatives',B:'Bread & grains',P:'Pantry',N:'Nuts & seeds',R:'Fruit'};
+const RAW=[
+['b1','B','Oatibix, soya milk & peanut butter',16,'','Oatibix:2:pc:B;Soya milk:200:ml:D;Peanut butter:15:g:P'],
+['b2','B','2 boiled eggs on rye',16,'','Eggs:2:pc:M;Rye bread:40:g:B'],
+['b3','B','Chickpea cakes with smoked salmon',18,'','Chickpea or rice cakes:3:pc:B;Smoked salmon:60:g:F'],
+['b4','B','Chickpea cakes with turkey',16,'','Chickpea or rice cakes:3:pc:B;Sliced turkey:40:g:M'],
+['b5','B','GF granola, soya yogurt & blueberries',13,'','Sugar-free GF granola:45:g:B;Soya yogurt:150:g:D;Blueberries:40:g:R'],
+['b6','B','GF porridge, chia & blueberries',13,'','GF oats:50:g:B;Soya milk:150:ml:D;Chia seeds:5:g:N;Blueberries:40:g:R'],
+['b7','B','Rye, almond butter & no-sugar jam',7,'','Rye bread:40:g:B;Almond butter:15:g:P'],
+['b8','B','Smashed avocado on chickpea cakes',6,'','Chickpea or rice cakes:3:pc:B;Avocado:1:pc:V'],
+['l1','L','Chicken, black rice & avocado salad',43,'','Chicken breast:150:g:M;Black rice:60:g:B;Avocado:0.5:pc:V;Baby spinach:60:g:V;Olive oil:10:ml:P'],
+['l2','L','Prawns, black rice & courgette',40,'','Prawns:200:g:F;Black rice:60:g:B;Courgette:150:g:V;Olive oil:10:ml:P'],
+['l3','L','Quinoa, asparagus, 2 eggs & olives',23,'','Quinoa:60:g:B;Asparagus:120:g:V;Eggs:2:pc:M;Olives:30:g:P'],
+['l4','L','Rye sandwich: hummus & turkey',42,'','Rye bread:60:g:B;Hummus:30:g:D;Sliced turkey:150:g:M;Salad leaves:40:g:V'],
+['l5','L','Chickpea soup, rye & smoked salmon',31,'','Chickpea soup:300:g:P;Rye bread:40:g:B;Smoked salmon:80:g:F'],
+['l6','L','Tuna & chickpea salad with rye',48,'','Tuna:150:g:F;Chickpeas (cooked):125:g:P;Rye bread:40:g:B;Tomatoes:100:g:V;Cucumber:60:g:V'],
+['l7','L','Smoked mackerel, green salad & rye',32,'','Smoked mackerel:150:g:F;Salad leaves:80:g:V;Rye bread:50:g:B'],
+['l8','L','Roast chicken, lentils & green salad',49,'','Chicken breast:150:g:M;Lentils (cooked):125:g:P;Salad leaves:80:g:V'],
+['l9','L','Feta, chickpea & asparagus salad',25,'','Feta:100:g:D;Chickpeas (cooked):125:g:P;Asparagus:120:g:V;Capers:10:g:P'],
+['l10','L','Lentil pasta, ricotta & courgettes',27,'','Lentil pasta:80:g:B;Ricotta:50:g:D;Courgette:150:g:V'],
+['d1','D','Steamed wild salmon & broccoli',46,'b','Wild salmon:220:g:F;Broccoli:150:g:V;Lemon:0.5:pc:R'],
+['d2','D','Lentil pasta with cod & courgettes',58,'','Lentil pasta:80:g:B;Cod fillet:250:g:F;Courgette:150:g:V'],
+['d3','D','Spinach omelette (3 eggs) & endive',20,'','Eggs:3:pc:M;Baby spinach:80:g:V;Endive:100:g:V'],
+['d4','D','Sea bass with fennel salad',50,'','Sea bass:250:g:F;Fennel:100:g:V;Salad leaves:60:g:V'],
+['d5','D','Grilled halloumi, avocado & carrot salad',33,'','Halloumi:150:g:D;Avocado:0.5:pc:V;Carrots:80:g:V;Cucumber:60:g:V'],
+['d6','D','Organic chicken stir-fry',62,'','Chicken breast:250:g:M;Peppers:100:g:V;Courgette:100:g:V'],
+['d7','D','Prawn & konjac noodle stir-fry',32,'','Prawns:175:g:F;Konjac noodles:150:g:B;Peppers:100:g:V;Courgette:100:g:V'],
+['d8','D','Cod, celery & linseed with broccoli',60,'b','Cod fillet:300:g:F;Broccoli:150:g:V;Celery:60:g:V;Linseed:5:g:N'],
+['d9','D','Leek omelette (3 eggs) & green salad',20,'','Eggs:3:pc:M;Leek:100:g:V;Tomatoes:80:g:V;Cucumber:60:g:V'],
+['d10','D','Fish skewers with chia salad',40,'','White fish:200:g:F;Salad leaves:80:g:V;Carrots:80:g:V;Chia seeds:5:g:N'],
+['s1','S','2 boiled eggs',11,'','Eggs:2:pc:M'],
+['s2','S','Edamame (100 g)',12,'','Edamame:100:g:V'],
+['s3','S','20 almonds',6,'n','Almonds:25:g:N'],
+['s4','S','15 almonds & blueberries',5,'n','Almonds:19:g:N;Blueberries:40:g:R'],
+['s5','S','20 lupins',6,'n','Lupin beans:40:g:P'],
+['s6','S','Oatcakes with smoked salmon',12,'','Oatcakes:2:pc:B;Smoked salmon:50:g:F'],
+['s7','S','Hummus pot with celery',4,'','Hummus:50:g:D;Celery:80:g:V'],
+['s8','S','Soya yogurt with chia',7,'','Soya yogurt:150:g:D;Chia seeds:5:g:N'],
+['s9','S','Bresaola, raw carrot & celery',13,'','Bresaola:50:g:M;Carrots:60:g:V;Celery:60:g:V'],
+['s10','S','Dry-cooked chickpeas (30 g)',6,'n','Dry-cooked chickpeas:30:g:P'],
+['s11','S','10 macadamias & olives',2,'n','Macadamias:15:g:N;Olives:30:g:P']];
+const M={};RAW.forEach(r=>M[r[0]]={id:r[0],t:r[1],n:r[2],p:r[3],f:r[4],i:r[5].split(';').map(x=>{const[n,q,u,a]=x.split(':');return{n,q:+q,u,a}})});
+const SH={L:'Lidl',S:"Sainsbury's",A:'ASDA or elsewhere'};
+const ST={'Wild salmon':'S','Sugar-free GF granola':'S','GF oats':'S','Chickpea or rice cakes':'S','Lentil pasta':'S','Chickpea soup':'S','Macadamias':'S','Almond butter':'S','Black rice':'S','Oatibix':'A','Konjac noodles':'A','Lupin beans':'A'};
+const NOTE={'Wild salmon':"Lidl salmon is usually farmed. Sainsbury's stocks frozen wild salmon.",'Sugar-free GF granola':"Check sugar on the label. Sainsbury's Free From or health aisle.",'GF oats':"Lidl oats aren't always certified gluten-free. Try Sainsbury's Free From.",'Oatibix':"Also at Sainsbury's. Lidl swap: own-brand wheat biscuits, check the sugar.",'Chickpea or rice cakes':"Sainsbury's or ASDA crispbread aisle. Lidl swap: oatcakes.",'Lentil pasta':"Free From aisle at Sainsbury's or ASDA. Check protein on the label. Lidl only has legume pasta occasionally.",'Chickpea soup':"Sainsbury's soups. Lidl swap: blend a tin of chickpeas with veg stock.",'Macadamias':'Nuts aisle. Lidl sometimes has them.','Almond butter':'Look for 100% almonds. Lidl sometimes has it.','Black rice':"Rice aisle. Lidl swap: brown rice (the plan allows it).",'Konjac noodles':'Free From or world foods aisle.','Lupin beans':'Turkish or Spanish shops, or online. Soak 1 hour.','Bresaola':"Lidl deli fridge when in stock, otherwise Sainsbury's.",'Soya milk':'Lidl Vemondo range. Choose unsweetened.','Soya yogurt':'Lidl Vemondo range. Choose unsweetened.','Rye bread':'Bakery aisle. Check rye is the main grain.','Chicken breast':"Plan prefers organic: Sainsbury's has it, Lidl is British non-organic.",'Endive':"Stock varies. Swap: chicory or little gem.",'Edamame':'Frozen aisle.','Sea bass':'Fresh fish fridge. Stock varies.'};
+const st=n=>ST[n]||'L';
+const KEY='weekly-menu-v1';
+let S={day:0,tab:'p',d:{},t:{},hide:false};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)S=Object.assign(S,s)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const ents=(d,s)=>((S.d[d]||{})[s])||[];
+function tot(d){const r=[0,0];SL.forEach(([s])=>ents(d,s).forEach(e=>{const m=M[e.m];if(m){r[0]+=m.p*e.w[0];r[1]+=m.p*e.w[1]}}));return r}
+function brass(d){let c=0;SL.forEach(([s])=>ents(d,s).forEach(e=>{if(M[e.m]&&M[e.m].f.includes('b')&&(e.w[0]||e.w[1]))c++}));return c}
+function bar(c,l,v){const w=Math.min(100,v/TARGET*100);return `<div class="tr ${c}"><b>${l}</b><div class="bar"><i style="width:${w}%"></i></div><span>${v>=TARGET?'Target met · ':''}${v} / ${TARGET} g</span></div>`}
+function renderPlan(){
+ const d=S.day,t=tot(d);
+ let h='<div class="days">'+DAYS.map((n,i)=>{const x=tot(i);return `<button data-a="day" data-i="${i}" aria-pressed="${i==d}">${n}<span class="dots"><i class="dot me ${x[0]>=TARGET?'on':''}"></i><i class="dot pa ${x[1]>=TARGET?'on':''}"></i></span></button>`}).join('')+'</div>';
+ h+='<div class="totals">'+bar('me','Me',t[0])+bar('pa','Partner',t[1])+(brass(d)>1?'<p class="warn">Broccoli appears more than once today. The plan limits brassicas to once a day.</p>':'')+'</div>';
+ SL.forEach(([s,n,tm])=>{
+  h+=`<div class="slot"><h3>${n}<small>${tm}</small></h3>`;
+  ents(d,s).forEach((e,k)=>{const m=M[e.m];if(!m)return;
+   h+=`<div class="entry"><div class="n"><span>${m.n}${m.f.includes('n')?'<span class="tag">no fridge</span>':''}</span><button class="x" data-a="del" data-s="${s}" data-k="${k}" aria-label="Remove ${m.n}">×</button></div><div class="chips"><button class="chip me" data-a="w" data-s="${s}" data-k="${k}" data-w="0" aria-pressed="${!!e.w[0]}">Me</button><button class="chip pa" data-a="w" data-s="${s}" data-k="${k}" data-w="1" aria-pressed="${!!e.w[1]}">Partner</button><span class="pg">${m.p} g protein each</span></div></div>`});
+  h+=`<button class="add" data-a="add" data-s="${s}">+ Add ${n.toLowerCase()}</button></div>`});
+ $('plan').innerHTML=h}
+function fmt(q,u){if(u=='pc')return '× '+(Math.ceil(q*2-1e-9)/2);if(q>=1000)return (Math.round(q/10)/100)+(u=='g'?' kg':' l');return Math.ceil(q/5)*5+' '+u}
+function groc(){const g={};for(let d=0;d<7;d++)SL.forEach(([s])=>ents(d,s).forEach(e=>{const m=M[e.m];if(!m)return;const k=e.w[0]+e.w[1];if(!k)return;m.i.forEach(i=>{const key=i.n+'|'+i.u;(g[key]=g[key]||{n:i.n,u:i.u,a:i.a,q:0,key}).q+=i.q*k})}));return Object.values(g)}
+function renderShop(){
+ const L=groc();let h='';
+ if(!L.length){$('shop').innerHTML='<p class="empty">Add meals to the menu and your shopping list for two will build itself here.</p>';return}
+ h+=`<div class="row"><button class="btn" data-a="copy">Copy list</button><button class="btn" data-a="hide">${S.hide?'Show':'Hide'} ticked items</button></div><div class="gl">`;
+ Object.keys(SH).forEach(a=>{const it=L.filter(x=>st(x.n)==a&&!(S.hide&&S.t[x.key])).sort((x,y)=>AI[x.a].localeCompare(AI[y.a])||x.n.localeCompare(y.n));if(!it.length)return;
+  h+=`<h3>${SH[a]}</h3>`+it.map(x=>`<div class="gi ${S.t[x.key]?'t':''}"><input type="checkbox" id="g_${x.key.replace(/\W/g,'_')}" data-a="tick" data-k="${x.key}" ${S.t[x.key]?'checked':''}><label for="g_${x.key.replace(/\W/g,'_')}">${x.n}${NOTE[x.n]?`<small class="sn">${NOTE[x.n]}</small>`:''}</label><b>${fmt(x.q,x.u)}</b></div>`).join('')});
+ $('shop').innerHTML=h+'</div>'}
+function render(){$('plan').hidden=S.tab!='p';$('shop').hidden=S.tab!='g';$('tp').setAttribute('aria-selected',S.tab=='p');$('tg').setAttribute('aria-selected',S.tab=='g');S.tab=='p'?renderPlan():renderShop();save()}
+function openPicker(s){
+ const sl=SL.find(x=>x[0]==s),ty=sl[3];let nf=false;
+ const draw=()=>{const L=RAW.map(r=>M[r[0]]).filter(m=>m.t==ty&&(!nf||m.f.includes('n'))).sort((a,b)=>b.p-a.p);
+  $('dlg').innerHTML=`<div class="dh"><h2>Choose ${sl[1].toLowerCase()}</h2><button class="btn" data-a="close">Close</button></div><div class="dl">${ty=='S'?`<label class="row"><input type="checkbox" id="nf" ${nf?'checked':''}> No-fridge snacks only (easy to carry)</label>`:''}${L.map(m=>`<button class="opt" data-a="pick" data-m="${m.id}" data-s="${s}"><span>${m.n}${m.f.includes('n')?'<span class="tag">no fridge</span>':''}${m.f.includes('b')?'<span class="tag">broccoli</span>':''}</span><em>${m.p} g</em></button>`).join('')}</div>`;
+  const c=$('nf');if(c)c.onchange=()=>{nf=c.checked;draw()}};
+ draw();$('dlg').showModal()}
+function copyList(){const L=groc();let t='Shopping list (for the week)\n';Object.keys(SH).forEach(a=>{const it=L.filter(x=>st(x.n)==a).sort((x,y)=>x.n.localeCompare(y.n));if(it.length)t+='\n'+SH[a]+'\n'+it.map(x=>'- '+x.n+': '+fmt(x.q,x.u)).join('\n')+'\n'});
+ const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();return ok}
+document.addEventListener('click',ev=>{
+ const b=ev.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,D=b.dataset;
+ if(a=='day'){S.day=+D.i}
+ else if(a=='add'){openPicker(D.s);return}
+ else if(a=='close'){$('dlg').close();return}
+ else if(a=='pick'){const d=(S.d[S.day]=S.d[S.day]||{});(d[D.s]=d[D.s]||[]).push({m:D.m,w:D.s=='di'?[1,1]:[1,0]});$('dlg').close()}
+ else if(a=='del'){S.d[S.day][D.s].splice(+D.k,1)}
+ else if(a=='w'){const e=S.d[S.day][D.s][+D.k];e.w[+D.w]=e.w[+D.w]?0:1}
+ else if(a=='hide'){S.hide=!S.hide}
+ else if(a=='copy'){const ok=copyList();b.textContent=ok?'Copied':'Copy blocked: select and copy manually';setTimeout(()=>b.textContent='Copy list',2000);return}
+ render()});
+document.addEventListener('change',ev=>{const b=ev.target.closest('[data-a=tick]');if(b){S.t[b.dataset.k]=b.checked;render()}});
+$('tp').onclick=()=>{S.tab='p';render()};$('tg').onclick=()=>{S.tab='g';render()};
+$('reset').onclick=()=>{if(confirm('Clear this week\'s menu and ticked groceries to start a new week?')){S.d={};S.t={};S.day=0;render()}};
+function enc(){const o={d:S.d,t:Object.keys(S.t).filter(k=>S.t[k])};return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function dec(c){c=c.trim();const i=c.indexOf('#p=');if(i>=0)c=c.slice(i+3);c=c.replace(/-/g,'+').replace(/_/g,'/');const o=JSON.parse(decodeURIComponent(escape(atob(c))));if(!o||typeof o.d!='object')throw 0;return o}
+function apply(o){const d={};Object.keys(o.d).forEach(k=>{if(!(k>=0&&k<7))return;d[k]={};SL.forEach(([s])=>{d[k][s]=((o.d[k]||{})[s]||[]).filter(e=>M[e.m]&&Array.isArray(e.w)).map(e=>({m:e.m,w:[e.w[0]?1:0,e.w[1]?1:0]}))})});S.d=d;S.t={};(o.t||[]).forEach(k=>S.t[k]=true);S.day=0}
+function copyEl(el){el.select();el.setSelectionRange(0,1e6);let ok=false;try{ok=document.execCommand('copy')}catch(e){}return ok}
+function openShare(){
+ const link=location.href.split('#')[0]+'#p='+enc();
+ $('dlg').innerHTML=`<div class="dh"><h2>Share this week</h2><button class="btn" data-a="close">Close</button></div><div class="dl"><p class="sub">Send this link. Whoever opens it gets this menu and the ticked groceries. It replaces the week saved on their phone, so send a new link after you change something.</p><textarea id="lk" readonly rows="4">${link}</textarea><div class="row"><button class="btn" id="cp">Copy link</button>${navigator.share?'<button class="btn" id="sn">Send…</button>':''}</div><h3 style="margin-top:14px">Received a link or code?</h3><textarea id="im" rows="3" placeholder="Paste it here"></textarea><div class="row"><button class="btn" id="go">Load it</button></div><p id="msg" class="sub"></p></div>`;
+ $('dlg').showModal();
+ $('cp').onclick=()=>{$('msg').textContent=copyEl($('lk'))?'Link copied.':'Copy blocked: press and hold the text to copy it.'};
+ if($('sn'))$('sn').onclick=()=>navigator.share({title:'Our weekly menu',url:link}).catch(()=>{});
+ $('go').onclick=()=>{try{apply(dec($('im').value));$('dlg').close();render()}catch(e){$('msg').textContent='That link or code could not be read. Check you pasted all of it.'}}}
+$('share').onclick=openShare;
+(function(){if(location.hash.indexOf('#p=')===0){try{const o=dec(location.hash);if(confirm('Load the shared menu? It replaces the week saved on this device.'))apply(o)}catch(e){alert('That link could not be read.')}history.replaceState(null,'',location.pathname+location.search)}})();
+render();
+</script>
+</body>
+</html>
